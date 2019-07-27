@@ -8,4 +8,6 @@ conda activate TDDPython
 pip install "django<1.12" "selenium<4"
 prompt (TDDPython) $p$g
 
+Installed Firefox via "choco install firefox"
+Downloaded and installed geckodriver.exe
 
