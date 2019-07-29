@@ -3,6 +3,8 @@ from django.http import HttpResponse
 
 
 def home_page( request ) :
-    response = HttpResponse('<html><title>To-Do lists</title><h1>To-Do</h1></html>')
-    return response
+    return render( request, 'home.html')
+
+    ### response = HttpResponse('<html><title>To-Do lists</title><h1>To-Do</h1></html>')
+    ### return response
 
