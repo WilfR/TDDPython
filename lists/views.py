@@ -3,8 +3,12 @@ from django.http import HttpResponse
 
 
 def home_page( request ) :
-    return render( request, 'home.html')
+    ### if request.method == "POST" :
+    ###     return HttpResponse(request.POST["item_text"])
+    theDict={'new_item_text': request.POST.get('item_text', ''),}
+    ### theDict={'new_item_text': request.POST.get('item_text', None),}
+    return render( request, 'home.html', theDict)
+    ###     {'new_item_text': request.POST.get('item_text', ''),}
 
-    ### response = HttpResponse('<html><title>To-Do lists</title><h1>To-Do</h1></html>')
-    ### return response
+
 
