@@ -23,7 +23,8 @@ class HomePageTest( TestCase ) :
 class ListViewTest( TestCase ) :
 
     def testUsesListTemplate( self ):
-        response = self.client.get('/lists/theOnlyListInTheWorld/')
+        theList = List.objects.create()
+        response = self.client.get(f'/lists/{theList.id}/')
         self.assertTemplateUsed(response, 'list.html')
 
 
@@ -31,9 +32,34 @@ class ListViewTest( TestCase ) :
         theList = List.objects.create()
         Item.objects.create(text='itemey 1', list=theList)
         Item.objects.create(text='itemey 2', list=theList)
-        response = self.client.get('/lists/theOnlyListInTheWorld/')
+
+        response = self.client.get(f'/lists/{theList.id}/')
+
         self.assertContains(response, 'itemey 1' )
         self.assertContains(response, 'itemey 2' )
+
+    def testDisplayOnlyItemsForThatList( self ) :
+        correctList = List.objects.create()
+        Item.objects.create(text='itemey 1', list=correctList)
+        Item.objects.create(text='itemey 2', list=correctList)
+        otherList = List.objects.create()
+        Item.objects.create(text='boxer 1', list=otherList)
+        Item.objects.create(text='boxer 2', list=otherList)
+
+        response = self.client.get(f'/lists/{correctList.id}/')
+
+        self.assertContains(response, 'itemey 1' )
+        self.assertContains(response, 'itemey 2' )
+        self.assertNotContains( response, 'boxer' )
+
+
+    def testPassesCorrectListToTemplate( self ) :
+        correctList = List.objects.create()
+        otherList = List.objects.create()
+
+        response = self.client.get(f'/lists/{correctList.id}/')
+
+        self.assertEqual( response.context['list'], correctList )
 
 
 class NewListTest( TestCase ) :
@@ -51,7 +77,8 @@ class NewListTest( TestCase ) :
 
     def testRedirectsAfterPost( self ) :
         response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
-        self.assertRedirects( response, '/lists/theOnlyListInTheWorld/')
+        theList = List.objects.first()
+        self.assertRedirects( response, f'/lists/{theList.id}/')
         ### self.assertEqual(response.status_code, 302)
         ### self.assertEqual(response['location'], '/lists/theOnlyListInTheWorld/')
 
@@ -86,4 +113,26 @@ class ListAndItemModelTest( TestCase ) :
         self.assertEqual( "Item the second", secondSavedItem.text )
         self.assertEqual( theList, secondSavedItem.list )
 
+
+
+class NewItemTest( TestCase ) :
+
+    def testCanSaveAPOSTRequestToAnExistingList( self ) :
+        correctList = List.objects.create()
+        otherList = List.objects.create()
+
+        self.client.post(f'/lists/{correctList.id}/add_item', data={'item_text': 'A new item for an existing list'})
+
+        self.assertEqual(Item.objects.count(), 1, "Items after adding one item")
+        newItem =Item.objects.first()
+        self.assertEqual( newItem.text, 'A new item for an existing list' )
+        self.assertEqual( newItem.list, correctList )
+
+    def testRedirectsToListView( self ) :
+        correctList = List.objects.create()
+        otherList = List.objects.create()
+
+        response = self.client.post(f'/lists/{correctList.id}/add_item', data={'item_text': 'A new item for an existing list'})
+
+        self.assertRedirects( response, f'/lists/{correctList.id}/')
 
