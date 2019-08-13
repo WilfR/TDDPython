@@ -6,43 +6,18 @@ from lists.models import Item
 from lists.views import home_page
 
 
+########################################################################
+###
+###      Unit Tests
+###
+########################################################################
+
 
 class HomePageTest( TestCase ) :
 
     def testUsesHomeTemplate( self ):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'home.html')
-
-
-    def testCanSaveAPostRequest( self ) :
-
-        ### Test initial state
-        self.assertEqual(Item.objects.count(), 0)
-
-        ### Execute the Post and test expected state (side effects of Post)
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(Item.objects.count(), 1)
-        newItem = Item.objects.first()
-        self.assertEqual(newItem.text, 'A new list item')
-
-    def testRedirectsAfterPost( self ) :
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/theOnlyListInTheWorld/')
-
-
-    def testSavesOnlyWhenNecessary( self ) :
-        self.assertEqual(Item.objects.count(), 0)
-        self.client.get('/')
-        self.assertEqual(Item.objects.count(), 0)
-
-
-###    def testDisplayAllListItems( self ) :
-###        Item.objects.create(text='itemey 1')
-###        Item.objects.create(text='itemey 2')
-###        response = self.client.get('/')
-###        self.assertContains(response, 'itemey 1' )
-###        self.assertContains(response, 'itemey 2' )
 
 
 class ListViewTest( TestCase ) :
@@ -58,6 +33,26 @@ class ListViewTest( TestCase ) :
         response = self.client.get('/lists/theOnlyListInTheWorld/')
         self.assertContains(response, 'itemey 1' )
         self.assertContains(response, 'itemey 2' )
+
+
+class NewListTest( TestCase ) :
+
+    def testCanSaveAPostRequest( self ) :
+
+        ### Test initial state
+        self.assertEqual(Item.objects.count(), 0)
+
+        ### Execute the Post and test expected state (side effects of Post)
+        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        self.assertEqual(Item.objects.count(), 1)
+        newItem = Item.objects.first()
+        self.assertEqual(newItem.text, 'A new list item')
+
+    def testRedirectsAfterPost( self ) :
+        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        self.assertRedirects( response, '/lists/theOnlyListInTheWorld/')
+        ### self.assertEqual(response.status_code, 302)
+        ### self.assertEqual(response['location'], '/lists/theOnlyListInTheWorld/')
 
 
 
