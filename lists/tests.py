@@ -28,7 +28,7 @@ class HomePageTest( TestCase ) :
     def testRedirectsAfterPost( self ) :
         response = self.client.post('/', data={'item_text': 'A new list item'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
+        self.assertEqual(response['location'], '/lists/theOnlyListInTheWorld/')
 
 
     def testSavesOnlyWhenNecessary( self ) :
@@ -37,12 +37,29 @@ class HomePageTest( TestCase ) :
         self.assertEqual(Item.objects.count(), 0)
 
 
+###    def testDisplayAllListItems( self ) :
+###        Item.objects.create(text='itemey 1')
+###        Item.objects.create(text='itemey 2')
+###        response = self.client.get('/')
+###        self.assertContains(response, 'itemey 1' )
+###        self.assertContains(response, 'itemey 2' )
+
+
+class ListViewTest( TestCase ) :
+
+    def testUsesListTemplate( self ):
+        response = self.client.get('/lists/theOnlyListInTheWorld/')
+        self.assertTemplateUsed(response, 'list.html')
+
+
     def testDisplayAllListItems( self ) :
         Item.objects.create(text='itemey 1')
         Item.objects.create(text='itemey 2')
-        response = self.client.get('/')
-        self.assertIn('itemey 1', response.content.decode())
-        self.assertIn('itemey 2', response.content.decode())
+        response = self.client.get('/lists/theOnlyListInTheWorld/')
+        self.assertContains(response, 'itemey 1' )
+        self.assertContains(response, 'itemey 2' )
+
+
 
 class ItemModelTest( TestCase ) :
 
