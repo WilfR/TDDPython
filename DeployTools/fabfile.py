@@ -1,6 +1,8 @@
 import random
 from fabric.contrib.files import append, exists
 from fabric.api import cd, env, local, run
+import subprocess
+import os
 
 REPO_URL = 'https://github.com/WilfR/TDDPython.git'
 
@@ -9,7 +11,12 @@ def _get_latest_source():
         run('git fetch')
     else:
         run(f'git clone {REPO_URL} .')
-    current_commit = local("git log -n 1 --format=%H", capture=True)
+
+    fabFilePath = env.real_fabfile
+    deployFolder =   os.path.dirname(fabFilePath)
+
+    current_commit = local(f'git -C "{deployFolder}" log -n 1 --format=%%H', capture=True)
+    print(f"current commit={current_commit}")
     run(f'git reset --hard {current_commit}')
 
 
@@ -29,6 +36,10 @@ def _create_or_update_dotenv():
 
 def _update_static_files():
     run('./virtualenv/bin/python manage.py collectstatic --noinput')
+
+
+def _update_database():
+    run('./virtualenv/bin/python manage.py migrate --noinput')
 
 
 def deploy():
