@@ -1,0 +1,4 @@
+@setlocal
+rem set STAGING_SERVER=104.225.208.105
+set STAGING_SERVER=wlrosenbaum.ca
+python manage.py test FunctionalTests  --failfast

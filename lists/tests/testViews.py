@@ -1,16 +1,10 @@
+from django.test import TestCase
+from lists.models import Item, List
+
 from django.http import HttpRequest
 from django.template.loader import render_to_string
-from django.test import TestCase
 from django.urls import resolve
-from lists.models import Item, List
 from lists.views import home_page
-
-
-########################################################################
-###
-###      Unit Tests
-###
-########################################################################
 
 
 class HomePageTest( TestCase ) :
@@ -79,40 +73,6 @@ class NewListTest( TestCase ) :
         response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
         theList = List.objects.first()
         self.assertRedirects( response, f'/lists/{theList.id}/')
-        ### self.assertEqual(response.status_code, 302)
-        ### self.assertEqual(response['location'], '/lists/theOnlyListInTheWorld/')
-
-
-
-class ListAndItemModelTest( TestCase ) :
-
-    def testSavingAndRetrievingItems( self ) :
-        theList = List()
-        theList.save()
-
-        firstItem = Item()
-        firstItem.text = "The first (ever) list item"
-        firstItem.list = theList
-        firstItem.save()
-
-        secondItem = Item()
-        secondItem.text = "Item the second"
-        secondItem.list = theList
-        secondItem.save()
-
-        savedItems = Item.objects.all()
-        self.assertEqual(savedItems.count(), 2, "Number of saved items")
-
-        savedList = List.objects.first()
-        self.assertEqual( savedList, theList, "Lists of objects" )
-
-        firstSavedItem = savedItems[0]
-        secondSavedItem = savedItems[1]
-        self.assertEqual( "The first (ever) list item", firstSavedItem.text )
-        self.assertEqual( theList, firstSavedItem.list )
-        self.assertEqual( "Item the second", secondSavedItem.text )
-        self.assertEqual( theList, secondSavedItem.list )
-
 
 
 class NewItemTest( TestCase ) :
