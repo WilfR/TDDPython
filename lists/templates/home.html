@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block header_text %}
-    Start a New To-Do List (Wibbler)
+    Start a New To-Do List
 {% endblock %}
 
 {% block form_action %}
-/lists/new
+    {% url 'new_list' %}
 {% endblock %}
 
 
