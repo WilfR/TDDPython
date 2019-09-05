@@ -13,7 +13,7 @@ class FunctionalTest( StaticLiveServerTestCase ) :
     def setUp( self ) :
         self.browser = webdriver.Firefox()
         stagingServer = os.environ.get('STAGING_SERVER')
-        print(f"Staging Server={stagingServer}")
+        ### print(f"Staging Server={stagingServer}")
         if stagingServer:
             self.live_server_url = "http://"+stagingServer
 
@@ -25,9 +25,10 @@ class FunctionalTest( StaticLiveServerTestCase ) :
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn( rowText, [row.text for row in rows] )
 
-    def sendTextToInputBox( self, sendText ) :
+    def sendTextToInputBox( self, sendText = None ) :
         inputbox = self.browser.find_element_by_id('id_new_item')
-        inputbox.send_keys(sendText)
+        if sendText is not None :
+            inputbox.send_keys(sendText)
         inputbox.send_keys(Keys.ENTER)
 
     def waitForRowInListTable( self, rowText ) :
@@ -43,6 +44,17 @@ class FunctionalTest( StaticLiveServerTestCase ) :
                 if currentTime - startTime > MAX_WAIT_TIME :
                     raise e
                 time.sleep(0.5)
+
+    def wait_for(self, fn):
+        start_time = time.time()
+        while True:
+            try:
+                return fn()
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT_TIME:
+                    raise e
+                time.sleep(0.5)
+
 
     def restartBrowser( self, url = None ) :
         self.browser.quit()
