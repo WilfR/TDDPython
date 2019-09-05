@@ -5,7 +5,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.urls import resolve
 from lists.views import home_page
-
+from django.utils.html import escape
 
 class HomePageTest( TestCase ) :
 
@@ -73,6 +73,43 @@ class NewListTest( TestCase ) :
         response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
         theList = List.objects.first()
         self.assertRedirects( response, f'/lists/{theList.id}/')
+
+    def testValidationErrorsAreSentBackToHomePageTemplate( self ) :
+
+        response = self.client.post('/lists/new', data={'item_text': ''})
+
+        self.assertEqual( response.status_code, 200 )
+        self.assertTemplateUsed(response, 'home.html')
+        expectedError = escape("You can't have an empty list item")
+        self.assertContains( response, expectedError )
+
+    def testInvalidListItemsAreNotSaved( self ) :
+        self.assertEqual(Item.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 0)
+
+        response = self.client.post('/lists/new', data={'item_text': ''})
+
+        self.assertEqual(Item.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 0)
+
+    def testInvalidListItemsAreNotSavedWithValidItems( self ) :
+        self.assertEqual(Item.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 0)
+
+        response = self.client.post('/lists/new', data={'item_text': 'Here is a new test item'})
+        self.assertEqual(Item.objects.count(), 1)
+        self.assertEqual(List.objects.count(), 1)
+
+        theList = List.objects.first()
+        response = self.client.post( f'/lists/{theList.id}/', data={'item_text': 'Here is a second test item'})
+
+        self.assertEqual(Item.objects.count(), 2)
+        self.assertEqual(List.objects.count(), 1)
+
+        response = self.client.post(f'/lists/{theList.id}/', data={'item_text': ''})
+
+        self.assertEqual(Item.objects.count(), 2)
+        self.assertEqual(List.objects.count(), 1)
 
 
 class NewItemTest( TestCase ) :
