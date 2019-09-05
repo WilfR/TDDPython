@@ -56,6 +56,27 @@ class ListViewTest( TestCase ) :
         self.assertEqual( response.context['list'], correctList )
 
 
+    def testCanSaveAPOSTRequestToAnExistingList( self ) :
+        correctList = List.objects.create()
+        otherList = List.objects.create()
+
+        self.client.post(f'/lists/{correctList.id}/', data={'item_text': 'A new item for an existing list'})
+
+        self.assertEqual(Item.objects.count(), 1, "Items after adding one item")
+        newItem =Item.objects.first()
+        self.assertEqual( newItem.text, 'A new item for an existing list' )
+        self.assertEqual( newItem.list, correctList )
+
+    def testPOSTRedirectsToListView( self ) :
+        correctList = List.objects.create()
+        otherList = List.objects.create()
+
+        response = self.client.post(f'/lists/{correctList.id}/', data={'item_text': 'A new item for an existing list'})
+
+        self.assertRedirects( response, f'/lists/{correctList.id}/')
+
+
+
 class NewListTest( TestCase ) :
 
     def testCanSaveAPostRequest( self ) :
@@ -112,24 +133,4 @@ class NewListTest( TestCase ) :
         self.assertEqual(List.objects.count(), 1)
 
 
-class NewItemTest( TestCase ) :
-
-    def testCanSaveAPOSTRequestToAnExistingList( self ) :
-        correctList = List.objects.create()
-        otherList = List.objects.create()
-
-        self.client.post(f'/lists/{correctList.id}/add_item', data={'item_text': 'A new item for an existing list'})
-
-        self.assertEqual(Item.objects.count(), 1, "Items after adding one item")
-        newItem =Item.objects.first()
-        self.assertEqual( newItem.text, 'A new item for an existing list' )
-        self.assertEqual( newItem.list, correctList )
-
-    def testRedirectsToListView( self ) :
-        correctList = List.objects.create()
-        otherList = List.objects.create()
-
-        response = self.client.post(f'/lists/{correctList.id}/add_item', data={'item_text': 'A new item for an existing list'})
-
-        self.assertRedirects( response, f'/lists/{correctList.id}/')
 
