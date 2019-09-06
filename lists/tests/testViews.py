@@ -7,6 +7,9 @@ from django.urls import resolve
 from lists.views import home_page
 from django.utils.html import escape
 
+from unittest import skip
+
+
 class HomePageTest( TestCase ) :
 
     def testUsesHomeTemplate( self ):
@@ -127,6 +130,7 @@ class NewListTest( TestCase ) :
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
 
+    @skip
     def testInvalidListItemsAreNotSavedWithValidItems( self ) :
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)

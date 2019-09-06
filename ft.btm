@@ -1,1 +1,6 @@
+@echo off
+color bri yellow on black
+echo ***** Executing Local Functional Tests ******
+color white on black
+
 python manage.py test FunctionalTests
