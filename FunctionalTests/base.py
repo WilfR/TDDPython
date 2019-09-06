@@ -26,7 +26,7 @@ class FunctionalTest( StaticLiveServerTestCase ) :
         self.assertIn( rowText, [row.text for row in rows] )
 
     def sendTextToInputBox( self, sendText = None ) :
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.getItemInputBox()
         if sendText is not None :
             inputbox.send_keys(sendText)
         inputbox.send_keys(Keys.ENTER)
@@ -62,4 +62,8 @@ class FunctionalTest( StaticLiveServerTestCase ) :
         if url == None :
             url = self.live_server_url
         self.browser.get( url )
+
+    def getItemInputBox( self ) :
+        return self.browser.find_element_by_id('id_text')
+
 

@@ -15,7 +15,7 @@ def view_list( request, listID ) :
 
         try:
             print("--> view_list POST processing")
-            theItem = Item.objects.create(text=request.POST['item_text'], list=theList)
+            theItem = Item.objects.create(text=request.POST['text'], list=theList)
             print(f"--> view_list POST processing theItem created text=({theItem.text})")
 
             theItem.full_clean()
@@ -34,7 +34,7 @@ def view_list( request, listID ) :
 
 def new_list( request ) :
     theList = List.objects.create()
-    theItem = Item.objects.create( text=request.POST['item_text'], list=theList )
+    theItem = Item.objects.create( text=request.POST['text'], list=theList )
 
     try:
         theItem.full_clean()

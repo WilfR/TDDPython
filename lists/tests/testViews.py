@@ -63,7 +63,7 @@ class ListViewTest( TestCase ) :
         correctList = List.objects.create()
         otherList = List.objects.create()
 
-        self.client.post(f'/lists/{correctList.id}/', data={'item_text': 'A new item for an existing list'})
+        self.client.post(f'/lists/{correctList.id}/', data={'text': 'A new item for an existing list'})
 
         self.assertEqual(Item.objects.count(), 1, "Items after adding one item")
         newItem =Item.objects.first()
@@ -74,7 +74,7 @@ class ListViewTest( TestCase ) :
         correctList = List.objects.create()
         otherList = List.objects.create()
 
-        response = self.client.post(f'/lists/{correctList.id}/', data={'item_text': 'A new item for an existing list'})
+        response = self.client.post(f'/lists/{correctList.id}/', data={'text': 'A new item for an existing list'})
 
         self.assertRedirects( response, f'/lists/{correctList.id}/')
 
@@ -84,7 +84,7 @@ class ListViewTest( TestCase ) :
 
         response = self.client.post(
             f'/lists/{theList.id}/',
-            data={'item_text': ''}
+            data={'text': ''}
             )
 
         self.assertEqual(response.status_code, 200)
@@ -102,19 +102,19 @@ class NewListTest( TestCase ) :
         self.assertEqual(Item.objects.count(), 0)
 
         ### Execute the Post and test expected state (side effects of Post)
-        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        response = self.client.post('/lists/new', data={'text': 'A new list item'})
         self.assertEqual(Item.objects.count(), 1)
         newItem = Item.objects.first()
         self.assertEqual(newItem.text, 'A new list item')
 
     def testRedirectsAfterPost( self ) :
-        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        response = self.client.post('/lists/new', data={'text': 'A new list item'})
         theList = List.objects.first()
         self.assertRedirects( response, f'/lists/{theList.id}/')
 
     def testValidationErrorsAreSentBackToHomePageTemplate( self ) :
 
-        response = self.client.post('/lists/new', data={'item_text': ''})
+        response = self.client.post('/lists/new', data={'text': ''})
 
         self.assertEqual( response.status_code, 200 )
         self.assertTemplateUsed(response, 'home.html')
@@ -125,7 +125,7 @@ class NewListTest( TestCase ) :
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
 
-        response = self.client.post('/lists/new', data={'item_text': ''})
+        response = self.client.post('/lists/new', data={'text': ''})
 
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
@@ -135,17 +135,17 @@ class NewListTest( TestCase ) :
         self.assertEqual(Item.objects.count(), 0)
         self.assertEqual(List.objects.count(), 0)
 
-        response = self.client.post('/lists/new', data={'item_text': 'Here is a new test item'})
+        response = self.client.post('/lists/new', data={'text': 'Here is a new test item'})
         self.assertEqual(Item.objects.count(), 1)
         self.assertEqual(List.objects.count(), 1)
 
         theList = List.objects.first()
-        response = self.client.post( f'/lists/{theList.id}/', data={'item_text': 'Here is a second test item'})
+        response = self.client.post( f'/lists/{theList.id}/', data={'text': 'Here is a second test item'})
 
         self.assertEqual(Item.objects.count(), 2)
         self.assertEqual(List.objects.count(), 1)
 
-        response = self.client.post(f'/lists/{theList.id}/', data={'item_text': ''})
+        response = self.client.post(f'/lists/{theList.id}/', data={'text': ''})
 
         self.assertEqual(Item.objects.count(), 2)
         self.assertEqual(List.objects.count(), 1)
