@@ -1,6 +1,6 @@
 from django.test import TestCase
 from lists.models import Item, List
-
+from lists.forms import ItemForm
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.urls import resolve
@@ -151,4 +151,8 @@ class NewListTest( TestCase ) :
         self.assertEqual(List.objects.count(), 1)
 
 
+
+    def testHomePageUsesItemForm(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
