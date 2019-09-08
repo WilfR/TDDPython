@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm
 from lists.models import Item, List
 
 class ItemFormTest(TestCase):
@@ -26,3 +26,25 @@ class ItemFormTest(TestCase):
         self.assertEqual(newItem, Item.objects.first())
         self.assertEqual(newItem.text, 'do me')
         self.assertEqual(newItem.list, theList)
+
+
+class ExistingListItemFormTest(TestCase):
+
+    def testFormRendersItemTextInput(self):
+        theList = List.objects.create()
+        form = ExistingListItemForm(for_list=theList)
+        self.assertIn('placeholder="Enter a to-do item"', form.as_p())
+
+    def testFormValidationForBlankItems(self):
+        theList = List.objects.create()
+        form = ExistingListItemForm(for_list=theList, data={'text': ''})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [EMPTY_ITEM_ERROR])
+
+    def testFormValidationForDuplicateItems(self):
+        theList = List.objects.create()
+        Item.objects.create(list=theList, text='no twins!')
+        form = ExistingListItemForm(for_list=theList, data={'text': 'no twins!'})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [DUPLICATE_ITEM_ERROR])
+
