@@ -1,6 +1,6 @@
 from django.test import TestCase
 from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.urls import resolve
@@ -176,20 +176,19 @@ class ListViewTest( TestCase ) :
 
     def testForInvalidInputPassesFormToTemplate( self ) :
         response = self.postEmptyItem()
-        self.assertIsInstance( response.context['form'], ItemForm )
+        self.assertIsInstance( response.context['form'], ExistingListItemForm )
 
     def testForInvalidInputShowsErrorOnPage( self ) :
         response = self.postEmptyItem()
         self.assertContains( response, escape( EMPTY_ITEM_ERROR ) )
 
-    @skip
     def testDuplicateItemValidationErrorsEndUpOnListsPage(self):
         list1 = List.objects.create()
         item1 = Item.objects.create(list=list1, text='textey')
 
         response = self.client.post( f'/lists/{list1.id}/', data={'text': 'textey'} )
 
-        expectedError = escape("You've already got this in your list")
+        expectedError = escape(DUPLICATE_ITEM_ERROR)
         self.assertContains(response, expectedError)
         self.assertTemplateUsed(response, 'list.html')
         self.assertEqual(Item.objects.all().count(), 1)
@@ -201,7 +200,7 @@ class ListViewTest( TestCase ) :
 
         response = self.client.get(f'/lists/{theList.id}/')
 
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
 
