@@ -49,6 +49,10 @@ class ListAndItemModelTest( TestCase ) :
         self.assertEqual( "Item the second", secondSavedItem.text )
         self.assertEqual( theList, secondSavedItem.list )
 
+    def testDefaultItemTextIsEmpty( self ) :
+        item = Item()
+        self.assertEqual( item.text, '' )
+
     def testItemIsRelatedToList( self ) :
         theList = List.objects.create()
         item = Item()
